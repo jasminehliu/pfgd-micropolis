@@ -318,13 +318,30 @@ class MapScanner extends TileBehavior
 	
 	void doUniversity()
 	{
-		
 		boolean powerOn = checkZonePower();
-		if ((city.cityTime % 16) == 0) {
+		city.universityCount++;
+		if ((city.cityTime % 8) == 0) {
 			repairZone(UNIVERSITY, 3);
 		}
+
+		int tpop = 15; //population of this zone
+
+		city.resPop += tpop;
 		
-	
+		int z;
+		if (powerOn) {
+			z = city.universityEffect;
+		} else {
+			z = city.universityEffect / 2;
+		}
+
+		traffic.mapX = xpos;
+		traffic.mapY = ypos;
+		if (!traffic.findPerimeterRoad()) {
+			z /= 2;
+		}
+
+		//city.universityMap[ypos/8][xpos/8] += z;
 	}
 	
 	/**

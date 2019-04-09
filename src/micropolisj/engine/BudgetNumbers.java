@@ -31,4 +31,8 @@ public class BudgetNumbers
 	public int policeRequest;
 	public int policeFunded;
 	public double policePercent;
+	
+	public int universityRequest;
+	public int universityFunded;
+	public double universityPercent;
 }

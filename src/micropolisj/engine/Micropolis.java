@@ -86,6 +86,8 @@ public class Micropolis
 	public int [][] fireRate;       //firestations reach- used for overlay graphs
 	int [][] policeMap;      //police stations- cleared and rebuilt each sim cycle
 	public int [][] policeMapEffect;//police stations reach- used for overlay graphs
+	//int [][] universityMap;
+	//public int [][] universityMapEffect;
 
 	/** For each 8x8 section of city, this is an integer between 0 and 64,
 	 * with higher numbers being closer to the center of the city. */
@@ -125,6 +127,7 @@ public class Micropolis
 	int nuclearCount;
 	int seaportCount;
 	int airportCount;
+	int universityCount;
 
 	int totalPop;
 	int lastCityPop;
@@ -135,6 +138,7 @@ public class Micropolis
 	int lastTotalPop;
 	int lastFireStationCount;
 	int lastPoliceCount;
+	int lastUniversityCount;
 
 	int trafficMaxLocationX;
 	int trafficMaxLocationY;
@@ -172,11 +176,13 @@ public class Micropolis
 	public double roadPercent = 1.0;
 	public double policePercent = 1.0;
 	public double firePercent = 1.0;
+	public double universityPercent = 1.0;
 
 	int taxEffect = 7;
 	int roadEffect = 32;
 	int policeEffect = 1000;
 	int fireEffect = 1000;
+	int universityEffect = 1000;
 
 	int cashFlow; //net change in totalFunds in previous year
 
@@ -247,6 +253,9 @@ public class Micropolis
 		fireRate = new int[smY][smX];
 		comRate = new int[smY][smX];
 
+		//universityMap = new int[smY][smX];
+		//universityMapEffect = new int[smY][smX];
+		
 		centerMassX = hX;
 		centerMassY = hY;
 	}
@@ -538,12 +547,14 @@ public class Micropolis
 		nuclearCount = 0;
 		seaportCount = 0;
 		airportCount = 0;
+		universityCount = 0;
 		powerPlants.clear();
 
 		for (int y = 0; y < fireStMap.length; y++) {
 			for (int x = 0; x < fireStMap[y].length; x++) {
 				fireStMap[y][x] = 0;
 				policeMap[y][x] = 0;
+				//universityMap[y][x] = 0;
 			}
 		}
 	}
@@ -1731,6 +1742,7 @@ public class Micropolis
 		lastTotalPop = totalPop;
 		lastFireStationCount = fireStationCount;
 		lastPoliceCount = policeCount;
+		lastUniversityCount = universityCount;
 
 		BudgetNumbers b = generateBudget();
 
@@ -1738,6 +1750,8 @@ public class Micropolis
 		budget.roadFundEscrow -= b.roadFunded;
 		budget.fireFundEscrow -= b.fireFunded;
 		budget.policeFundEscrow -= b.policeFunded;
+		budget.universityFundEscrow -= b.universityFunded;
+		
 
 		taxEffect = b.taxRate;
 		roadEffect = b.roadRequest != 0 ?
@@ -1748,6 +1762,9 @@ public class Micropolis
 			1000;
 		fireEffect = b.fireRequest != 0 ?
 			(int)Math.floor(1000.0 * (double)b.fireFunded / (double)b.fireRequest) :
+			1000;
+		universityEffect = b.universityRequest != 0 ?
+			(int)Math.floor(1000.0 * (double)b.universityFunded / (double)b.universityRequest) :
 			1000;
 	}
 
@@ -1763,7 +1780,7 @@ public class Micropolis
 	void collectTax()
 	{
 		int revenue = budget.taxFund / TAXFREQ;
-		int expenses = -(budget.roadFundEscrow + budget.fireFundEscrow + budget.policeFundEscrow) / TAXFREQ;
+		int expenses = -(budget.roadFundEscrow + budget.fireFundEscrow + budget.policeFundEscrow + budget.universityFundEscrow) / TAXFREQ;
 
 		FinancialHistory hist = new FinancialHistory();
 		hist.cityTime = cityTime;
@@ -1780,6 +1797,7 @@ public class Micropolis
 		budget.roadFundEscrow = 0;
 		budget.fireFundEscrow = 0;
 		budget.policeFundEscrow = 0;
+		budget.universityFundEscrow = 0;
 	}
 
 	/** Annual maintenance cost of each police station. */
@@ -1788,6 +1806,8 @@ public class Micropolis
 	/** Annual maintenance cost of each fire station. */
 	static final int FIRE_STATION_MAINTENANCE = 100;
 
+	static final int UNIVERSITY_MAINTENANCE = 200;
+	
 	/**
 	 * Calculate the current budget numbers.
 	 */
@@ -1798,6 +1818,7 @@ public class Micropolis
 		b.roadPercent = Math.max(0.0, roadPercent);
 		b.firePercent = Math.max(0.0, firePercent);
 		b.policePercent = Math.max(0.0, policePercent);
+		b.universityPercent = Math.max(0.0, universityPercent);
 
 		b.previousBalance = budget.totalFunds;
 		b.taxIncome = (int)Math.round(lastTotalPop * landValueAverage / 120 * b.taxRate * FLevels[gameLevel]);
@@ -1806,10 +1827,12 @@ public class Micropolis
 		b.roadRequest = (int)Math.round((lastRoadTotal + lastRailTotal * 2) * RLevels[gameLevel]);
 		b.fireRequest = FIRE_STATION_MAINTENANCE * lastFireStationCount;
 		b.policeRequest = POLICE_STATION_MAINTENANCE * lastPoliceCount;
+		b.universityRequest = UNIVERSITY_MAINTENANCE * lastUniversityCount;
 
 		b.roadFunded = (int)Math.round(b.roadRequest * b.roadPercent);
 		b.fireFunded = (int)Math.round(b.fireRequest * b.firePercent);
 		b.policeFunded = (int)Math.round(b.policeRequest * b.policePercent);
+		b.universityFunded = (int)Math.round(b.universityRequest * b.universityPercent);
 
 		int yumDuckets = budget.totalFunds + b.taxIncome;
 		assert yumDuckets >= 0;
@@ -1856,7 +1879,7 @@ public class Micropolis
 			b.policePercent = 0.0;
 		}
 
-		b.operatingExpenses = b.roadFunded + b.fireFunded + b.policeFunded;
+		b.operatingExpenses = b.roadFunded + b.fireFunded + b.policeFunded + b.universityFunded;
 		b.newBalance = b.previousBalance + b.taxIncome - b.operatingExpenses;
 
 		return b;
@@ -1969,6 +1992,8 @@ public class Micropolis
 		firePercent = (double)n / 65536.0;
 		n = dis.readInt();                     //62,63... road percent
 		roadPercent = (double)n / 65536.0;
+		n = dis.readInt();
+		universityPercent = (double)n / 65536.0;
 
 		for (int i = 64; i < 120; i++)
 		{
@@ -2620,6 +2645,10 @@ public class Micropolis
 				sendMessage(MicropolisMessage.POLICE_NEED_FUNDING);
 			}
 			break;
+		case 62:
+			if (universityEffect < 700 && totalPop > 20) {
+				sendMessage(MicropolisMessage.UNIVERSITY_NEED_FUNDING);
+			}
 		case 63:
 			if (trafficAverage > 60) {
 				sendMessage(MicropolisMessage.HIGH_TRAFFIC);

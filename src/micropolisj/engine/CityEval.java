@@ -102,6 +102,7 @@ public class CityEval
 		z += engine.airportCount * 10000;
 		z += engine.coalCount * 3000;
 		z += engine.nuclearCount * 6000;
+		z += engine.universityCount * 7000;
 		cityAssValue = z * 1000;
 	}
 
@@ -194,7 +195,8 @@ public class CityEval
 
 	int getUnemployment()
 	{
-		int b = (engine.comPop + engine.indPop) * 8;
+		// 15 accounts for university population
+		int b = (engine.comPop + engine.indPop + 15) * 8;
 		if (b == 0)
 			return 0;
 
@@ -240,6 +242,7 @@ public class CityEval
 		if (engine.resValve < -1000) { z *= 0.85; }
 		if (engine.comValve < -1000) { z *= 0.85; }
 		if (engine.indValve < -1000) { z *= 0.85; }
+		if (engine.universityEffect < 1000) { z *= (0.9 + (engine.universityEffect / 10000.1)); }
 
 		double SM = 1.0;
 		if (cityPop == 0 && deltaCityPop == 0) {
