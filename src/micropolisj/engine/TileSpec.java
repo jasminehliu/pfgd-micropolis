@@ -65,6 +65,7 @@ public class TileSpec
 
 	public BuildingInfo getBuildingInfo()
 	{
+		//System.out.println(buildingInfo.height);
 		return buildingInfo;
 	}
 
@@ -90,7 +91,7 @@ public class TileSpec
 				startTile++;
 			}
 		}
-
+		
 		this.buildingInfo = bi;
 	}
 

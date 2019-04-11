@@ -341,7 +341,8 @@ class MapScanner extends TileBehavior
 			z /= 2;
 		}
 
-		//city.universityMap[ypos/8][xpos/8] += z;
+		adjustROG(2);
+		city.universityMap[ypos/8][xpos/8] += z;
 	}
 	
 	/**
@@ -456,6 +457,7 @@ class MapScanner extends TileBehavior
 		city.comZoneCount++;
 
 		int tpop = commercialZonePop(tile);
+		if (city.universityMap[xpos/8][ypos/8] > 0) tpop += 20;
 		city.comPop += tpop;
 
 		int trafficGood;
@@ -512,6 +514,8 @@ class MapScanner extends TileBehavior
 		int tpop = industrialZonePop(tile);
 		city.indPop += tpop;
 
+		if (city.universityMap[xpos/8][ypos/8] > 0) tpop += 20;
+		
 		int trafficGood;
 		if (tpop > PRNG.nextInt(6))
 		{
@@ -571,6 +575,8 @@ class MapScanner extends TileBehavior
 			tpop = residentialZonePop(tile);
 		}
 
+		if (city.universityMap[xpos/8][ypos/8] > 0) tpop += 20;
+		
 		city.resPop += tpop;
 
 		int trafficGood;

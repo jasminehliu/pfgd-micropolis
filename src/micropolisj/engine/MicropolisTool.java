@@ -69,7 +69,6 @@ public enum MicropolisTool
 		case POWERPLANT:
 		case NUCLEAR:
 		case AIRPORT:
-			return new BuildingTool(engine, this, xpos, ypos);
 		case UNIVERSITY:
 			return new BuildingTool(engine, this, xpos, ypos);
 

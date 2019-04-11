@@ -86,8 +86,8 @@ public class Micropolis
 	public int [][] fireRate;       //firestations reach- used for overlay graphs
 	int [][] policeMap;      //police stations- cleared and rebuilt each sim cycle
 	public int [][] policeMapEffect;//police stations reach- used for overlay graphs
-	//int [][] universityMap;
-	//public int [][] universityMapEffect;
+	int [][] universityMap;
+	public int [][] universityMapEffect;
 
 	/** For each 8x8 section of city, this is an integer between 0 and 64,
 	 * with higher numbers being closer to the center of the city. */
@@ -253,8 +253,8 @@ public class Micropolis
 		fireRate = new int[smY][smX];
 		comRate = new int[smY][smX];
 
-		//universityMap = new int[smY][smX];
-		//universityMapEffect = new int[smY][smX];
+		universityMap = new int[smY][smX];
+		universityMapEffect = new int[smY][smX];
 		
 		centerMassX = hX;
 		centerMassY = hY;
@@ -554,7 +554,7 @@ public class Micropolis
 			for (int x = 0; x < fireStMap[y].length; x++) {
 				fireStMap[y][x] = 0;
 				policeMap[y][x] = 0;
-				//universityMap[y][x] = 0;
+				universityMap[y][x] = 0;
 			}
 		}
 	}
@@ -853,6 +853,7 @@ public class Micropolis
 		for (int sy = 0; sy < policeMap.length; sy++) {
 			for (int sx = 0; sx < policeMap[sy].length; sx++) {
 				policeMapEffect[sy][sx] = policeMap[sy][sx];
+				universityMapEffect[sy][sx] = universityMap[sy][sx];
 			}
 		}
 
@@ -1147,6 +1148,8 @@ public class Micropolis
 	//power, terrain, land value
 	void ptlScan()
 	{
+		System.out.println(universityMapEffect);
+		
 		final int qX = (getWidth()+3)/4;
 		final int qY = (getHeight()+3)/4;
 		int [][] qtem = new int[qY][qX];
@@ -1203,6 +1206,7 @@ public class Micropolis
 					dis *= 4;
 					dis += terrainMem[y/2][x/2];
 					dis -= pollutionMem[y][x];
+					dis += universityMap[y/4][x/4] / 10;
 					if (crimeMem[y][x] > 190) {
 						dis -= 20;
 					}
@@ -1233,7 +1237,7 @@ public class Micropolis
 		{
 			for (int y = 0; y < HWLDY; y++)
 			{
-				int z = tem[y][x];
+				int z = tem[y][x] - universityMapEffect[y/4][x/4] / 10;
 				pollutionMem[y][x] = z;
 
 				if (z != 0)
@@ -2052,6 +2056,7 @@ public class Micropolis
 		out.writeInt((int)(policePercent * 65536));
 		out.writeInt((int)(firePercent * 65536));
 		out.writeInt((int)(roadPercent * 65536));
+		out.writeInt((int)(universityPercent * 65536));
 
 		//64
 		for (int i = 64; i < 120; i++) {
